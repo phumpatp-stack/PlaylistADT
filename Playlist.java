@@ -10,10 +10,10 @@ import java.util.Set;
  * ค่านามธรรม (A): ลำดับของเพลง เช่น [เพลงA, เพลงB, เพลงC]
  *
  * ตัวอย่างการใช้งาน:
- *     Playlist p = new Playlist();
- *     p.add("Bohemian Rhapsody");
- *     p.add("Imagine");
- *     System.out.println(p.size());   // 2
+ * Playlist p = new Playlist();
+ * p.add("Bohemian Rhapsody");
+ * p.add("Imagine");
+ * System.out.println(p.size()); // 2
  */
 public class Playlist {
 
@@ -24,22 +24,33 @@ public class Playlist {
 
     // TODO 1: เขียน Abstraction Function ตรงนี้
     // Abstraction Function:
-    //   AF(songs) = ...
+    // AF(songs) =เพลย์ลิสต์ที่เล่นเพลงตามลำดับในsongs โดยเริ่มจาก songs.get(0), songs.get(1), ... ตามลำดับ
 
     // TODO 2: เขียน Representation Invariant ตรงนี้ (4 ข้อ)
     // Representation Invariant:
-    //   ...
+    //ต้องมีรายการเพลงอยู่จริง (ไม่เป็น null)
+//ไม่มีเพลงใดเป็น null
+//ไม่มีชื่อเพลงที่เป็นสตริงว่าง
+//ชื่อเพลงห้ามซ้ำกัน
+//มีได้ไม่เกิน MAX_SONGS (100) เพลง
 
     // TODO 3: เขียน Safety from rep exposure ตรงนี้
     // Safety from rep exposure:
-    //   ...
+    // มีการcopyช่วงขาเข้าและขาออก และ มีListเป็น Final
 
     /**
      * TODO 4: เขียน checkRep()
      * แปลง RI ทุกข้อเป็น assert หนึ่งบรรทัด พร้อมข้อความอธิบาย
      */
     private void checkRep() {
-        // เขียนโค้ดตรงนี้
+        assert songs != null : "songs is not null";
+        assert songs.size() <= MAX_SONGS;
+          Set<String> seen = new HashSet<>();
+        for (String s : songs) {
+            assert songs != null;
+            assert s != ""   ;
+            assert seen.add(s);
+        }
     }
 
     // ===== Creator =====
@@ -62,9 +73,18 @@ public class Playlist {
      * @throws IllegalArgumentException ถ้า initial ผิดเงื่อนไข
      */
     public Playlist(List<String> initial) {
-        this.songs = null;   // แก้บรรทัดนี้
-        // เขียนโค้ดตรงนี้
+        if(initial == null) throw new IllegalArgumentException(" initial not be null");
+        if(initial.size()>MAX_SONGS) throw new IllegalArgumentException();
+        Set<String> seen = new HashSet<>();
+        for(String s: initial){
+            if(s==null) throw new IllegalArgumentException();
+            if(s=="") throw new IllegalArgumentException();
+            if(!seen.add(s))throw new IllegalArgumentException();
+        }
+        this.songs = new ArrayList<>(initial); // แก้บรรทัดนี้
+        checkRep();
     }
+    
 
     // ===== Mutators =====
 
@@ -76,7 +96,12 @@ public class Playlist {
      * @throws IllegalArgumentException ถ้า song เป็น null หรือสตริงว่าง
      */
     public boolean add(String song) {
-        return false;   // แก้บรรทัดนี้
+       if(song == null || song == "") throw new IllegalArgumentException();
+       if(songs.contains(song))return false; 
+       if(songs.size()==MAX_SONGS) return false;// แก้บรรทัดนี้
+
+       songs.add(song);
+       return true;
     }
 
     /**
@@ -86,7 +111,9 @@ public class Playlist {
      * @return true ถ้าลบสำเร็จ, false ถ้าไม่พบเพลงนี้
      */
     public boolean remove(String song) {
-        return false;   // แก้บรรทัดนี้
+       if(!songs.contains(song))return false;
+       songs.remove(song);
+       return true;  // แก้บรรทัดนี้
     }
 
     // ===== Observers =====
@@ -95,14 +122,14 @@ public class Playlist {
      * TODO 8: คืนจำนวนเพลงในเพลย์ลิสต์
      */
     public int size() {
-        return -1;   // แก้บรรทัดนี้
+        return songs.size(); // แก้บรรทัดนี้
     }
 
     /**
      * TODO 9: ตรวจว่ามีเพลงนี้อยู่หรือไม่
      */
     public boolean contains(String song) {
-        return false;   // แก้บรรทัดนี้
+        return songs.contains(song); // แก้บรรทัดนี้
     }
 
     /**
@@ -111,7 +138,7 @@ public class Playlist {
      * ระวัง: ห้ามคืน reference ของ songs ตรง ๆ (rep exposure!)
      */
     public List<String> songs() {
-        return null;   // แก้บรรทัดนี้
+       return new ArrayList<>(songs);// แก้บรรทัดนี้
     }
 
     // ===== Producer =====
@@ -124,7 +151,9 @@ public class Playlist {
      * @return เพลย์ลิสต์ใหม่ที่สลับลำดับแล้ว
      */
     public Playlist shuffled() {
-        return null;   // แก้บรรทัดนี้
+      List<String> copy = new ArrayList<>(songs);
+      Collections.shuffle(copy);
+      return new Playlist(copy); // แก้บรรทัดนี้
     }
 
     @Override
